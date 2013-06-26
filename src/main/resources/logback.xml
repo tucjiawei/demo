@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="gbk"?>
+<configuration  debug="true" scan="true" scanPeriod="30 minutes">
+
+<!-- ==================================================================================== -->
+    <property name="logDir" value="d:/demolog"/>
+	<!-- 打印到控制台 -->
+	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<pattern>%date{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n</pattern>
+		</layout>
+	</appender>
+	
+<!-- ==================================================================================== -->
+	<appender name="infolog"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<Encoding>GBK</Encoding>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">   
+			<level>INFO</level>   
+		</filter> 
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${logDir}/info/log.%d{yyyy-MM-dd.HH}.%i.log.gz</fileNamePattern> 
+			<maxHistory>2160</maxHistory>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>20MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+		<encoder>    
+		      <pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{5}.%method - %msg%n</pattern>    
+		</encoder>
+	</appender>
+	
+    <appender name="debuglog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+   	 	<Encoding>GBK</Encoding>
+   	 	<filter class="ch.qos.logback.classic.filter.ThresholdFilter">   
+			<level>DEBUG</level>   
+		</filter>   
+	    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+	      	<fileNamePattern>${logDir}/debug/log.%d{yyyy-MM-dd.HH}.log.gz</fileNamePattern>
+	      	<maxHistory>2160</maxHistory>
+	      	<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>20MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+	    </rollingPolicy>
+	    <encoder>
+			<pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n</pattern>
+		</encoder>
+	 </appender>
+
+    <appender name="errorlog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    	<Encoding>GBK</Encoding>
+   	 	<filter class="ch.qos.logback.classic.filter.ThresholdFilter">   
+			<level>ERROR</level>   
+		</filter>   
+	    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+	      	<fileNamePattern>${logDir}/error/log.%d{yyyy-MM-dd.HH}.log.gz</fileNamePattern>
+	      	<maxHistory>2160</maxHistory>
+	      	<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>20MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+	    </rollingPolicy>
+	    <encoder>
+			<pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n</pattern>
+		</encoder>
+    </appender>
+    <!-- sql appender -->
+	<appender name="dayrollingfile_sql"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<Encoding>GBK</Encoding>
+		
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${logDir}/monitor/sql/log.%d{yyyy-MM-dd.HH}.log.gz</fileNamePattern> 
+			<!-- 限制文件最大保存时间为90天 90*24=2160个文件-->
+			<maxHistory>2160</maxHistory>
+		</rollingPolicy>
+		<!-- 对记录事件进行格式化 -->
+		<encoder>    
+		      <pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} - %msg%n</pattern>    
+		</encoder>
+	</appender>
+	
+	<!-- apiIn appender -->
+	<appender name="dayrollingfile_apiIn"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<Encoding>GBK</Encoding>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${logDir}/monitor/apiIn/log.%d{yyyy-MM-dd.HH}.log.gz</fileNamePattern> 
+			<!-- 限制文件最大保存时间为90天 90*24=2160个文件-->
+			<maxHistory>2160</maxHistory>
+		</rollingPolicy>
+		<!-- 对记录事件进行格式化 -->
+		<encoder>    
+		      <pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} - %msg%n</pattern>    
+		</encoder>
+	</appender>
+
+	<!-- api outer appender -->
+	<appender name="dayrollingfile_apiOuter"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<Encoding>GBK</Encoding>
+		
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${logDir}/monitor/apiOut/log.%d{yyyy-MM-dd.HH}.log.gz</fileNamePattern> 
+			<!-- 限制文件最大保存时间为90天 90*24=2160个文件-->
+			<maxHistory>2160</maxHistory>
+		</rollingPolicy>
+		<!-- 对记录事件进行格式化 -->
+		<encoder>    
+		      <pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} - %msg%n</pattern>    
+		</encoder>
+	</appender>
+<!-- ==================================================================================== -->
+	
+	<root level="DEBUG">
+		<appender-ref ref="stdout" />
+		<appender-ref ref="infolog" />  
+		<appender-ref ref="debuglog" />  
+		<appender-ref ref="errorlog" />  
+	</root>
+
+	<!-- 第三方日志级别的控制 -->
+	<logger name="java.sql" level="TRACE" />
+</configuration>
