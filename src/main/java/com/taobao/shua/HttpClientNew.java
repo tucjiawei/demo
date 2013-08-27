@@ -1,49 +1,89 @@
-package com.demo.httpclient;
+package com.taobao.shua;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 
-  
-/** 
- * 发送请求 
- *  
- * @author Legend、 
- *  
- */  
-  
-public class SendRequest {  
-    // 实例化一个Httpclient的  
-//  static DefaultHttpClient client = new DefaultHttpClient();  
-    static {  
-  
-//      // 设置代理  
-//      HttpHost proxy = new HttpHost("192.168.13.19", 7777);  
-//      client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);  
-    }  
-  
-    // 这是模拟get请求  
-    public static Result sendGet(String url, Map<String, String> headers,  
+
+public class HttpClientNew {
+	private static Set<Cookie> cookies = new HashSet<Cookie>();
+	public static void main(String[] args) throws Exception {
+//		  httpclient.getHostConfiguration().setProxy("myproxyhost", 8080);
+//		  httpclient.getState().setProxyCredentials("my-proxy-realm", " myproxyhost",
+//		  new UsernamePasswordCredentials("my-proxy-username", "my-proxy-password"))
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("Content-Type", "application/x-www-form-urlencoded");
+		headers.put("Accept-Language", "en-US,en;q=0.8");
+		headers.put("Cookie", "ue=tucjiawei@126.com; as=http://www.douban.com/");
+		headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+		headers.put("Accept-Encoding", "gzip,deflate,sdch");
+		headers.put("Cache-Control", "max-age=0");
+		headers.put("Connection", "keep-alive");
+		headers.put("Host", "www.douban.com");
+		headers.put("Origin", "www.douban.com");
+		headers.put("Referer", "www.douban.com");
+		headers.put("User-Agent", "Mozilla/5.0");
+//				Cookie:ue="tucjiawei@126.com"; as="http://www.douban.com/"
+		Map<String,String> params = new HashMap<String, String>();
+		params.put("source", "index_nav");
+		params.put("form_email", "tucjiawei@126.com");
+		params.put("remember", "on");
+		params.put("form_password", "sunday&MONDAY");
+//		Result result = HttpClientNew.sendPost("https://www.douban.com/accounts/login", headers, params, "utf-8");
+//		String cookieLogin = assemblyCookie(result.getCookie());
+//		FileUtils.writeStringToFile(new File("d:/cookies.txt"), cookieLogin);
+		headers.put("Cookie", FileUtils.readFileToString(new File("d:/cookies.txt")));
+		Result result = HttpClientNew.sendGet("http://www.douban.com", headers, null, "UTF-8",false);
+		if(result.getStatusCode()==302){
+			System.out.println(result.getHeaders().get("Location"));
+			String location = result.getHeaders().get("Location").getValue();
+			System.out.println(location);
+			headers.put("Cookie", assemblyCookie(cookies));
+			result = HttpClientNew.sendGet("http://www.douban.com", headers, null, "UTF-8",false);
+			if(result.getStatusCode()==302){
+				location = result.getHeaders().get("Location").getValue();
+				headers.put("Cookie", assemblyCookie(cookies));
+				result = HttpClientNew.sendPost(location, headers, params, "UTF-8");
+				System.out.println(result.getStatusCode());
+			}else{
+				System.out.println(result.getContent());
+			}
+		}else{
+			System.out.println(result.getContent());
+		}
+		
+	}
+	public static Result sendGet(String url, Map<String, String> headers,  
             Map<String, String> params, String encoding, boolean duan)  
             throws ClientProtocolException, IOException {  
         DefaultHttpClient client = new DefaultHttpClient();  
+        HttpHost proxy = new HttpHost("111.1.36.166", 83);
+        client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
         // 如果有参数的就拼装起来 三目运算  
         url = url + (null == params ? "" : assemblyParameter(params));  
         // 这是实例化一个get请求  
@@ -57,8 +97,15 @@ public class SendRequest {
         HttpResponse response = client.execute(hp);  
         HttpEntity entityRsp = response.getEntity();  
         StringBuffer result1 = new StringBuffer();  
-        BufferedReader rd = new BufferedReader(new InputStreamReader(  
-                entityRsp.getContent(), encoding));  
+        BufferedReader rd = null;
+        if(response.getLastHeader("Content-Encoding")!= null  
+                && response.getLastHeader("Content-Encoding").getValue().toLowerCase().indexOf("gzip") > -1){
+        	 rd = new BufferedReader(new InputStreamReader(  
+        			 new GZIPInputStream(entityRsp.getContent()), encoding));  
+        }else{
+        	 rd = new BufferedReader(new InputStreamReader(  
+             		(entityRsp.getContent()), encoding));  
+        }  
         String tempLine = rd.readLine();  
         while (tempLine != null) {  
             //获取百度token  
@@ -71,7 +118,7 @@ public class SendRequest {
             result1.append(tempLine);  
             tempLine = rd.readLine();  
         }  
-        System.out.println(result1.toString());  
+        result.setContent(result1.toString());  
         // 如果为true则断掉这个get请求  
         if (duan)  
             hp.abort();  
@@ -79,7 +126,8 @@ public class SendRequest {
         HttpEntity entity = response.getEntity();  
   
         // 设置返回的cookie  
-        result.setCookie(assemblyCookie(client.getCookieStore().getCookies()));  
+        result.setCookie(client.getCookieStore().getCookies()); 
+        cookies.addAll(client.getCookieStore().getCookies());
         // 设置返回的状态  
         result.setStatusCode(response.getStatusLine().getStatusCode());  
         // 设置返回的头部信心  
@@ -87,21 +135,16 @@ public class SendRequest {
         // 设置返回的信息  
         result.setHttpEntity(entity);  
         return result;  
-    }  
-  
-    public static Result sendGet(String url, Map<String, String> headers,  
-            Map<String, String> params, String encoding)  
-            throws ClientProtocolException, IOException {  
-        return sendGet(url, headers, params, encoding, false);  
-    }  
-  
-    // 这是模拟post请求  
-    public static Result sendPost(String url, Map<String, String> headers,  
+    }
+	public static Result sendPost(String url, Map<String, String> headers,  
             Map<String, String> params, String encoding)  
             throws ClientProtocolException, IOException {  
         // 实例化一个post请求  
+		
         HttpPost post = new HttpPost(url);  
         DefaultHttpClient client = new DefaultHttpClient();  
+//        HttpHost proxy = new HttpHost("111.1.36.166", 83);
+//        client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
         // 设置需要提交的参数  
         List<NameValuePair> list = new ArrayList<NameValuePair>();  
         if (params != null) {  
@@ -121,31 +164,40 @@ public class SendRequest {
         HttpEntity entity = response.getEntity();  
         HttpEntity entityRsp = response.getEntity();  
         StringBuffer result1 = new StringBuffer();  
-        BufferedReader rd = new BufferedReader(new InputStreamReader(  
-                entityRsp.getContent(), encoding));  
+        BufferedReader rd = null;
+        if(response.getLastHeader("Content-Encoding")!= null  
+                && response.getLastHeader("Content-Encoding").getValue().toLowerCase().indexOf("gzip") > -1){
+        	 rd = new BufferedReader(new InputStreamReader(  
+        			 new GZIPInputStream(entityRsp.getContent()), encoding));  
+        }else{
+        	 rd = new BufferedReader(new InputStreamReader(  
+             		(entityRsp.getContent()), encoding));  
+        }
+       
         String tempLine = rd.readLine();  
         // 封装返回的参数  
         Result result = new Result();  
         while (tempLine != null) {  
             //返回获取请求地址  
-            if (tempLine.contains("encodeURI('")) {  
+           /* if (tempLine.contains("encodeURI('")) {  
                 // System.out.println(tempLine.substring("bdPass.api.params.login_token=".length()+1,tempLine.length()-2));  
                 // result.setToken(tempLine.substring("bdPass.api.params.login_token=".length()+1,tempLine.length()-2));  
                 result.setToken(tempLine.substring(  
                         tempLine.indexOf("encodeURI('") + 11,  
                         tempLine.indexOf("');")));  
-            }  
+            } */ 
             result1.append(tempLine);  
             tempLine = rd.readLine();  
         }  
-        System.out.println(result1.toString());  
+        result.setContent(result1.toString());  
   
         // 设置返回状态代码  
         result.setStatusCode(response.getStatusLine().getStatusCode());  
         // 设置返回的头部信息  
         result.setHeaders(response.getAllHeaders());  
         // 设置返回的cookie信心  
-        result.setCookie(assemblyCookie(client.getCookieStore().getCookies()));  
+        result.setCookie(client.getCookieStore().getCookies());  
+        cookies.addAll(client.getCookieStore().getCookies());
         // 设置返回到信息  
         result.setHttpEntity(entity);  
         return result;  
@@ -165,7 +217,7 @@ public class SendRequest {
     }  
   
     // 这是组装cookie  
-    public static String assemblyCookie(List<Cookie> cookies) {  
+    public static String assemblyCookie(Collection<Cookie> cookies) {  
         StringBuffer sbu = new StringBuffer();  
         for (Cookie cookie : cookies) {  
             sbu.append(cookie.getName()).append("=").append(cookie.getValue())  
@@ -184,49 +236,4 @@ public class SendRequest {
         }  
         return para.substring(0, para.length() - 1);  
     } 
-    public static void main(String[] args) throws Exception {
-    	  Result r1 = SendRequest.sendGet("https://passport.baidu.com/v2/?login", null, null, "GBK");
-          //设置参数
-          Map<String, String> params = new HashMap<String, String>();
-          params.put("class", "login");
-          params.put("tpl", "mn");
-          params.put("tangram", "true");
-          //获取头部信息
-          Map<String, Header> headers = r1.getHeaders();
-          //设置头部参数
-          Map<String, String> headerMap = new HashMap<String, String>();
-          for(String str : headers.keySet()){
-          headerMap.put(str, headers.get(str).toString().substring(str.length()+2));
-          }
-          //设置cookie
-          headerMap.put("Cookie", r1.getCookie());
-          //请求获取token
-          Result r = SendRequest.sendGet("https://passport.baidu.com/v2/api/?getapi&class=login&tpl=mn&tangram=true", headerMap, params, "GBK");
-          //设置登录参数
-          Map<String, String> params2 = new HashMap<String, String>();
-          params2.put("class", "login");
-          params2.put("tpl", "mn");
-          params2.put("tangram", "true");
-          params2.put("username", "账号");
-          params2.put("password", "密码");
-          
-          params2.put("token", r.getToken());
-          params2.put("isPhone", "false");
-          params2.put("loginType", "1");
-          params2.put("verifycode", "");
-          
-          params2.put("callback", "parent.bdPass.api.login._postCallback");
-           
-          //设置cookie   只需设置cookie  设置其他header参数会导致报错
-          Map<String, String> headerMap2 = new HashMap<String, String>();
-          headerMap2.put("Cookie", r.getCookie());
-          //post登录请求
-          Result result = SendRequest.sendPost("https://passport.baidu.com/v2/api/?login", headerMap2, params2, "UTF-8");
-          //判断是否登录成功
-          Map<String, String> headerMap3 = new HashMap<String, String>();
-          //一定要设置cookie  否则会未登录
-          headerMap3.put("Cookie", result.getCookie());
-          //请求百度首页
-          SendRequest.sendGet("http://www.baidu.com", headerMap3, null, "UTF-8");
-	}
-} 
+}

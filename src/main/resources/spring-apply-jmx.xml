@@ -44,10 +44,10 @@
             <value>8989</value>  
         </property>  
     </bean>
-    <bean id="htmlAdapter"
+<!--     <bean id="htmlAdapter"
      	class="com.sun.jdmk.comm.HtmlAdaptorServer" init-method="start">  
         <property name="port">  
             <value>9093</value>  
         </property>  
-    </bean>  
+    </bean>   -->
 </beans>  

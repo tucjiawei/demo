@@ -1,8 +1,9 @@
 package com.demo.mail;
 
+import java.io.RandomAccessFile;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,23 +20,23 @@ public class SendMailService {
 	private static final Logger log  = LoggerFactory.getLogger(SendMailService.class.getName());
 	
 	//邮件服务器地址
-	@Value("${mail_server_host}")
+//	@Value("${mail_server_host}")
 	String mail_server_host;
 	
 	//邮件服务器端口
-	@Value("${mail_server_port}")
+//	@Value("${mail_server_port}")
 	String mail_server_port;
 	
 	//From邮件账户
-	@Value("${from_user_address}")
+//	@Value("${from_user_address}")
 	String from_user_address;
 	
 	//From邮件账户密码
-	@Value("${from_user_pass}")
+//	@Value("${from_user_pass}")
 	String from_user_pass;
 	
 	//To邮件账户
-	@Value("${to_user_address}")
+//	@Value("${to_user_address}")
 	String to_user_address;
 	
 	/**
@@ -75,7 +76,7 @@ public class SendMailService {
 		SimpleMailSender.sendHtmlMail(mailInfo);// 发送html格式
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		MailSenderInfo mailInfo = new MailSenderInfo();
 		mailInfo.setMailServerHost("smtp.126.com");
 		mailInfo.setMailServerPort("25");
@@ -83,15 +84,39 @@ public class SendMailService {
 		mailInfo.setUserName("tucjiawei@126.com");
 		mailInfo.setPassword("WANGZHELAI");// 您的邮箱密码
 		mailInfo.setFromAddress("tucjiawei@126.com");
-		mailInfo.setToAddress("jiawei@dangdang.com");
-		mailInfo.setSubject("123");
-		mailInfo.setContent("456");
-		mailInfo.setAttachFileNames(new String[]{"d:/1280367683639.jpg"});
+		mailInfo.setToAddress("tucjiawei@126.com");
+		mailInfo.setSubject("testproxy");
+		mailInfo.setContent("test");
+//		mailInfo.setAttachFileNames(new String[]{"e:/test.jpg"});
+		
 		// 这个类主要来发送邮件
 	//	SimpleMailSender sms = new SimpleMailSender();
 	//	sms.sendHtmlMail(mailInfo);
 	//	sms.sendTextMail(mailInfo);// 发送文体格式
-		SimpleMailSender.sendHtmlMail(mailInfo);// 发送html格式
+//		SimpleMailSender.sendHtmlMail(mailInfo);// 发送html格式
+		
+//		mailInfo.setMailServerHost("pop3.126.com");
+//		mailInfo.setMailServerPort("25");
+//		mailInfo.setUserName("tucjiawei@126.com");
+//		mailInfo.setPassword("WANGZHELAI");// 您的邮箱密码
+//		SimpleMailSender.readMail(mailInfo);
+		int path = System.getProperty("line.separator").length();
+		RandomAccessFile f= new RandomAccessFile("E:/tmp/ips.txt","r");
+		String str = null;
+		int i=0;
+		int t=0;
+		while(i<10 && (str=f.readLine())!=null){
+			System.out.println(str);
+			t+=str.length()+path;
+			i++;
+		}
+		System.out.println(t);
+		f.seek(t);
+		i=0;
+		while(i<10 && (str=f.readLine())!=null){
+			t+=str.length();
+			i++;
+		}
 	}
 	
 	

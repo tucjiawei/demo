@@ -34,11 +34,14 @@ public class MailSenderInfo {
 	 * 获得邮件会话属性
 	 */
 	public Properties getProperties() {
-		Properties p = new Properties();
-		p.put("mail.smtp.host", this.mailServerHost);
-		p.put("mail.smtp.port", this.mailServerPort);
-		p.put("mail.smtp.auth", "true");
-		return p;
+		Properties props = new Properties();
+		props.put("mail.smtp.host", this.mailServerHost);
+		props.put("mail.smtp.port", this.mailServerPort);
+		props.put("mail.smtp.auth", "true");
+        props.put("mail.debug", "false");
+        props.put("mail.store.protocol", "pop3");
+        props.put("mail.transport.protocol", "smtp");
+		return props;
 	}
 
 	public String getMailServerHost() {
