@@ -485,17 +485,6 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-		  <groupId>de.innosystec</groupId>
-		  <artifactId>unrar</artifactId>
-		  <version>0.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi</artifactId>
-			<version>3.9</version>
-		</dependency> 
-		
-		<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
 			</dependency>
@@ -514,11 +503,6 @@
 			<dependency>
 			<groupId>quartz</groupId>
 			<artifactId>quartz</artifactId>
-		</dependency>
-		<dependency>
-		  <groupId>com.sum</groupId>
-		  <artifactId>jdmk</artifactId>
-		  <version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.mail</groupId>
