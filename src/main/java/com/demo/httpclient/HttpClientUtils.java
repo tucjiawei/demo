@@ -2,11 +2,12 @@ package com.demo.httpclient;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.http.Header;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
@@ -16,9 +17,12 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.protocol.BasicHttpContext;
@@ -39,9 +43,31 @@ public class HttpClientUtils {
 	private List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
 
 	private HttpResponse response = null;
+	
+	private List<Header> headers = new ArrayList<Header>();
+	
+	private CookieStore cs = new BasicCookieStore();
+	
 	public HttpClientUtils(){
-		init();
+		context.setAttribute(ClientContext.COOKIE_STORE, cs);
 	}
+	
+	public HttpClientUtils addHeader(String name,String value){
+		headers.add(new BasicHeader(name, value));
+		return this;
+	}
+	
+	public HttpClientUtils addCookie(String name,String value){
+		cs.addCookie(new BasicClientCookie(name, value));
+		return this;
+	}
+	
+	public HttpClientUtils setProxy(String host,int port,String protocol){
+		HttpHost proxy = new HttpHost(host,port,protocol);
+		this.httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+		return this;
+	}
+	
 	public HttpClientUtils setSocketTimeout(int timeout){
 		this.httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
 		return this;
@@ -50,16 +76,15 @@ public class HttpClientUtils {
 		this.httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
 		return this;
 	}
-	private void init() {
-		CookieStore cs = new BasicCookieStore();
-		context.setAttribute(ClientContext.COOKIE_STORE, cs);
-	}
 	public HttpClientUtils send(String url, String encoding) {
 		return this.send(url, encoding,HttpMethod.GET);
 	}
 	public HttpClientUtils send(String url, String encoding,HttpMethod httpMethod) {
 		HttpUriRequest request = getMethod(url, encoding, httpMethod);
 		try {
+			for(Header header:headers){
+				request.addHeader(header);
+			}
 			response = httpClient.execute(request, context);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -149,10 +174,14 @@ public class HttpClientUtils {
 
 
 	public static void main(String[] args) throws Exception {
-		Map<String,Object> params  = new HashMap<String, Object>();
-		params.put("shop_id", "152");
-		String resutl = new HttpClientUtils().setSocketTimeout(1000).setParam("shop_id","152").send("http://ddpim_api.mall.dangdang.com/standard_column.php", "GBK",HttpMethod.POST).getContent();
-		System.out.println(resutl);
+		HttpClientUtils result = new HttpClientUtils()
+//		.setProxy("localhost", 8087, "http")
+		.addCookie("bid", "bFVylItI27M")
+		.addCookie("ck", "fzPq")
+		.addCookie("dbcl2", "41255901:s6rzNs7KFKU")
+		.send("http://sourceforge.net/", "UTF-8",HttpMethod.POST);
+		System.out.println(result.getContent());
+		System.out.println(result.getCookies());
 	}
 
 }
