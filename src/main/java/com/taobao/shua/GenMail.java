@@ -73,7 +73,7 @@ public class GenMail {
 				mailInfo.setMailServerPort("25");
 				mailInfo.setValidate(true);
 				mailInfo.setUserName(sender);
-				mailInfo.setPassword("diudiumofawu1");// 您的邮箱密码
+				mailInfo.setPassword("diudiumofawu1");
 				mailInfo.setFromAddress(sender);
 				mailInfo.setToAddress(ccAddr);
 				mailInfo.setSubject("[分享]---又一波潘多拉来袭");
@@ -112,19 +112,19 @@ public class GenMail {
 			// 设置邮件消息的发送者
 			mailMessage.setFrom(from);
 			// 创建邮件的接收者地址，并设置到邮件消息中
-			 Address[] tos = null;
+			Address[] tos = null;
 	           //将要群发的邮箱地址存在了个字符串中 用 ；隔开
-	            String[] receivers =org.apache.commons.lang.StringUtils.split(mailInfo.getToAddress(),";");
-	            if (receivers != null){
-	                // 为每个邮件接收者创建一个地址
-	                tos = new InternetAddress[receivers.length];
-	                           for (int i=0; i<receivers.length; i++){
-	                	   String s=receivers[i];
-	                                   tos[i] = new InternetAddress(s);
-	                            }
-	            } 			
-	            // 将所有接收者地址都添加到邮件接收者属性中
-	            mailMessage.setRecipients(Message.RecipientType.BCC, tos);
+            String[] receivers =StringUtils.split(mailInfo.getToAddress(),";");
+            if (receivers != null){
+                // 为每个邮件接收者创建一个地址
+                tos = new InternetAddress[receivers.length];
+                for (int i=0; i<receivers.length; i++){
+                	   String s=receivers[i];
+                       tos[i] = new InternetAddress(s);
+                }
+            } 			
+            // 将所有接收者地址都添加到邮件接收者属性中
+            mailMessage.setRecipients(Message.RecipientType.BCC, tos);
 			// 设置邮件消息的主题
 			mailMessage.setSubject(mailInfo.getSubject());
 			// 设置邮件消息发送的时间

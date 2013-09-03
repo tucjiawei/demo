@@ -87,12 +87,10 @@ public class EmailRead {
                     int numberOfParts = multiPart.getCount();
                     for (int partCount = 0; partCount < numberOfParts; partCount++) {
                         MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
-                        System.out.println("==="+part.getDisposition());
                         if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
                             // this part is attachment
                             String fileName = part.getFileName();
                             attachFiles += fileName + ", ";
-                            System.out.println(fileName);
 //                            part.saveFile(saveDirectory + File.separator + fileName);
                         } else {
                             // this part may be the message content
@@ -111,13 +109,6 @@ public class EmailRead {
                     }
                 }
  
-                // print out details of each message
-                System.out.println("Message #" + (i + 1) + ":");
-                System.out.println("\t From: " + from);
-                System.out.println("\t Subject: " + subject);
-                System.out.println("\t Sent Date: " + sentDate);
-                System.out.println("\t Message: " + messageContent);
-                System.out.println("\t Attachments: " + attachFiles);
             }
  
             // disconnect
@@ -134,9 +125,6 @@ public class EmailRead {
         }
     }
  
-    /**
-     * Runs this program with Gmail POP3 server
-     */
     public static void main(String[] args) {
         String host = "pop3.126.com";
         String port = "110";
