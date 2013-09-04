@@ -1,5 +1,6 @@
 package com.demo.mail;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -22,15 +23,6 @@ import javax.mail.internet.MimeBodyPart;
  *
  */
 public class EmailRead {
-    private String saveDirectory;
- 
-    /**
-     * Sets the directory where attached files will be stored.
-     * @param dir absolute path of the directory
-     */
-    public void setSaveDirectory(String dir) {
-        this.saveDirectory = dir;
-    }
  
     /**
      * Downloads new messages and saves attachments to disk if any.
@@ -38,14 +30,14 @@ public class EmailRead {
      * @param port
      * @param userName
      * @param password
+     * @param readEmailCallback 
      */
-    public void downloadEmailAttachments(String host, String port,
-            String userName, String password) {
+    public static void downloadEmailAttachments(MailInfo mailInfo, ReadEmailCallback readEmailCallback) {
         Properties properties = new Properties();
  
         // server setting
-        properties.put("mail.pop3.host", host);
-        properties.put("mail.pop3.port", port);
+        properties.put("mail.pop3.host", mailInfo.getMailServerHost());
+        properties.put("mail.pop3.port", mailInfo.getMailServerPort());
  
         // SSL setting
 //        properties.setProperty("mail.pop3.socketFactory.class",
@@ -57,61 +49,28 @@ public class EmailRead {
         Session session = Session.getDefaultInstance(properties);
  
         try {
-            // connects to the message store
             Store store = session.getStore("pop3");
-            store.connect(userName, password);
- 
-            // opens the inbox folder
+            store.connect(mailInfo.getUserName(), mailInfo.getPassword());
             Folder folderInbox = store.getFolder("INBOX");
             folderInbox.open(Folder.READ_ONLY);
  
-            // fetches new messages from server
             Message[] arrayMessages = folderInbox.getMessages();
- 
-            for (int i = 0; i <1; i++) {
+            for (int i = 0; i<arrayMessages.length; i++) {
                 Message message = arrayMessages[i];
                 Address[] fromAddress = message.getFrom();
                 String from = fromAddress[0].toString();
                 String subject = message.getSubject();
                 String sentDate = message.getSentDate().toString();
  
-                String contentType = message.getContentType();
-                String messageContent = "";
+                System.out.println(subject);
+                System.out.println(from);
+                System.out.println(sentDate);
  
-                // store attachment file name, separated by comma
-                String attachFiles = "";
+                String content = parseEmailContent(message.getContent(),mailInfo);
  
-                if (contentType.contains("multipart")) {
-                    // content may contain attachments
-                    Multipart multiPart = (Multipart) message.getContent();
-                    int numberOfParts = multiPart.getCount();
-                    for (int partCount = 0; partCount < numberOfParts; partCount++) {
-                        MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
-                        if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
-                            // this part is attachment
-                            String fileName = part.getFileName();
-                            attachFiles += fileName + ", ";
-//                            part.saveFile(saveDirectory + File.separator + fileName);
-                        } else {
-                            // this part may be the message content
-                            messageContent = part.getContent().toString();
-                        }
-                    }
- 
-                    if (attachFiles.length() > 1) {
-                        attachFiles = attachFiles.substring(0, attachFiles.length() - 2);
-                    }
-                } else if (contentType.contains("text/plain")
-                        || contentType.contains("text/html")) {
-                    Object content = message.getContent();
-                    if (content != null) {
-                        messageContent = content.toString();
-                    }
-                }
- 
+                readEmailCallback.execute(content);
             }
- 
-            // disconnect
+            
             folderInbox.close(false);
             store.close();
         } catch (NoSuchProviderException ex) {
@@ -124,18 +83,45 @@ public class EmailRead {
             ex.printStackTrace();
         }
     }
+    
+    public static String parseEmailContent(Object object, MailInfo mailInfo) throws MessagingException, IOException{
+    	String content = null;
+    	if(object instanceof Multipart){
+    		Multipart multiPart = (Multipart)object;
+    		int numberOfParts = multiPart.getCount();
+            for (int partCount = 0; partCount < numberOfParts; partCount++) {
+                MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
+                if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
+                    String fileName = mailInfo.getAttachDir() + File.separator + part.getFileName();
+                    mailInfo.getAttachFileNames().add(fileName);
+                    part.saveFile(fileName);
+                    
+                } else {
+                	parseEmailContent(part.getContent(),mailInfo);
+                }
+            }
+
+    	}else {
+        	content = object.toString();
+        }
+    	return content;
+    }
  
     public static void main(String[] args) {
         String host = "pop3.126.com";
         String port = "110";
         String userName = "tucjiawei@126.com";
         String password = "WANGZHELAI";
+        String saveDirectory = "D:/Attachment";
+        
+        MailInfo mailInfo = new MailInfo();
+        mailInfo.setUserName(userName);
+        mailInfo.setPassword(password);
+        mailInfo.setMailServerHost(host);
+        mailInfo.setMailServerPort(port);
+        mailInfo.setAttachDir(saveDirectory);
  
-        String saveDirectory = "E:/Attachment";
- 
-        EmailRead receiver = new EmailRead();
-        receiver.setSaveDirectory(saveDirectory);
-        receiver.downloadEmailAttachments(host, port, userName, password);
+        EmailRead.downloadEmailAttachments(mailInfo,new ReadEmailCallbackImpl());
  
     }
 }

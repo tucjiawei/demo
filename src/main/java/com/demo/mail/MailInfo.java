@@ -1,5 +1,6 @@
 package com.demo.mail;
 
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Properties;
  * @Version V1.0
  * @date 2013-3-1 下午02:36:24
  */
-public class MailSenderInfo {
+public class MailInfo {
 	// 发送邮件的服务器的IP和端口
 	private String mailServerHost;
 	private String mailServerPort;
@@ -28,7 +29,9 @@ public class MailSenderInfo {
 	// 邮件的文本内容
 	private String content;
 	// 邮件附件的文件名
-	private String[] attachFileNames;
+	private List<String> attachFileNames;
+	
+	private String attachDir;
 
 	/**
 	 * 获得邮件会话属性
@@ -66,14 +69,6 @@ public class MailSenderInfo {
 
 	public void setValidate(boolean validate) {
 		this.validate = validate;
-	}
-
-	public String[] getAttachFileNames() {
-		return attachFileNames;
-	}
-
-	public void setAttachFileNames(String[] fileNames) {
-		this.attachFileNames = fileNames;
 	}
 
 	public String getFromAddress() {
@@ -122,5 +117,21 @@ public class MailSenderInfo {
 
 	public void setContent(String textContent) {
 		this.content = textContent;
+	}
+
+	public String getAttachDir() {
+		return attachDir;
+	}
+
+	public void setAttachDir(String attachDir) {
+		this.attachDir = attachDir;
+	}
+
+	public void setAttachFileNames(List<String> attachFileNames) {
+		this.attachFileNames = attachFileNames;
+	}
+
+	public List<String> getAttachFileNames() {
+		return attachFileNames;
 	}
 }

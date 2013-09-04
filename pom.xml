@@ -509,5 +509,18 @@
 			<artifactId>mail</artifactId>
 			<version>1.4.6</version>
 		</dependency>
+		<dependency>
+			<groupId>mx4j</groupId>
+			<artifactId>mx4j-jmx</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>mx4j</groupId>
+			<artifactId>mx4j-tools</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+            
+            
 	</dependencies>
 </project>

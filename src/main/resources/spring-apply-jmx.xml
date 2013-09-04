@@ -44,10 +44,12 @@
             <value>8989</value>  
         </property>  
     </bean>
-<!--     <bean id="htmlAdapter"
-     	class="com.sun.jdmk.comm.HtmlAdaptorServer" init-method="start">  
-        <property name="port">  
-            <value>9093</value>  
-        </property>  
-    </bean>   -->
+    
+    <bean id="httpAdaptor" class="com.demo.mbean.AutostartHttpAdaptor" init-method="start">
+	    <property name="processor">
+	        <ref bean="xsltProcessor" />
+	    </property>
+	    <property name="port" value="9093" />
+	</bean>
+	<bean id="xsltProcessor" class="mx4j.tools.adaptor.http.XSLTProcessor" />
 </beans>  

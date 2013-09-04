@@ -41,7 +41,7 @@
 		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="triggers">
 			<list>
-				<ref local="subSidyJobTrigger" />  
+				<!-- <ref local="subSidyJobTrigger" />   -->
 			</list>
 		</property>
 	</bean>
