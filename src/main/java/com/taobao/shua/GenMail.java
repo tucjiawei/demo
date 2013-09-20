@@ -25,7 +25,6 @@ public class GenMail {
 		List<String> senders = FileUtils.readLines(new File(baseDir+"/sender/sender.txt"));
 		
 		int position = Integer.parseInt(FileUtils.readFileToString(new File(baseDir+"/position.txt")));
-		position = 0;
 		int ccCount = 39;
 		int crlfSize = System.getProperty("line.separator").length();
 		RandomAccessFile ccFile= new RandomAccessFile(baseDir+"/receive/allmail.txt","r");
