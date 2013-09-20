@@ -1,4 +1,4 @@
-package com.demo.mail;
+package com.taobao.shua;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +14,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.demo.mail.EmailSend;
+import com.demo.mail.MailInfo;
+
 public class GenMail {
 	public static void main(String[] args) throws IOException {
 		String encoding = "utf-8";
@@ -22,6 +25,7 @@ public class GenMail {
 		List<String> senders = FileUtils.readLines(new File(baseDir+"/sender/sender.txt"));
 		
 		int position = Integer.parseInt(FileUtils.readFileToString(new File(baseDir+"/position.txt")));
+		position = 0;
 		int ccCount = 39;
 		int crlfSize = System.getProperty("line.separator").length();
 		RandomAccessFile ccFile= new RandomAccessFile(baseDir+"/receive/allmail.txt","r");
@@ -38,6 +42,10 @@ public class GenMail {
 			mailInfo.setFromAddress(sender);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			String contentDir = baseDir+"/content/"+sdf.format(new Date())+"/"+(++senderIndex);
+			//没有内容要发送，退出
+			if(!new File(contentDir).exists()){
+				break;
+			}
 			List<String> lines = null;
 			String content = "";
 			try{
@@ -45,11 +53,11 @@ public class GenMail {
 				lines = FileUtils.readLines(new File(contentDir+"/replace.txt"), encoding);
 			}catch(Exception e){
 				e.printStackTrace();
-			}
-			if(CollectionUtils.isEmpty(lines)){
 				continue;
 			}
-			lines.remove(0);
+			if(CollectionUtils.isNotEmpty(lines)){
+				lines.remove(0);
+			}
 			List<String[]> lineSplit = new ArrayList<String[]>();
 			for(String line:lines){
 				String[] arr = line.split("\\+{5}");
@@ -74,7 +82,7 @@ public class GenMail {
 					index++;
 				}
 				ccAddr = StringUtils.chomp(ccAddr, ";");
-				if(ArrayUtils.getLength(ccAddr)==1){
+				if(!StringUtils.contains(ccAddr,";")){
 					break;
 				}
 				
