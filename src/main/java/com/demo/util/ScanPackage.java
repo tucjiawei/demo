@@ -10,15 +10,39 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 
-import org.springframework.web.context.ContextLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 
 public class ScanPackage {
 	public static void main(String[] args) throws Exception {
-		List<String> result = new ScanPackage().getClassNameList("org.springframework.web.context", ContextLoader.class,true);
-		for(String name:result){
-			System.out.println(name);
+//		List<String> result = new ScanPackage().getClassNameList("org.springframework.web.context", ContextLoader.class,true);
+//		for(String name:result){
+//			System.out.println(name);
+//		}
+		System.out.println(new ScanPackage().getClazzNameList("classpath*:com/demo/**/*.class"));
+	}
+	
+	public  List<String> getClazzNameList(String location) throws IOException{
+		
+		List<String> result = new ArrayList<String>();
+		
+		Resource[] res = new PathMatchingResourcePatternResolver().getResources(location);
+		for(Resource r :res){
+			URL url = r.getURL();
+			if(url.getProtocol().indexOf("jar")!=-1){
+				String clazz = url.toString().substring(url.toString().indexOf("!")+2);
+				result.add(clazz);
+			}else{
+				int rootDirStart = location.indexOf(":")+1;
+				int rootDirEnd = location.indexOf("/*");
+				rootDirEnd = rootDirEnd==-1?0:rootDirEnd;
+				String pattern = location.substring(rootDirStart,rootDirEnd);
+				String clazz = url.getPath().substring(url.getPath().lastIndexOf(pattern));
+				result.add(clazz);
+			}
 		}
+		return result;
 	}
 
 	public List<String> getClassNameList(String prefix,Class<?> clazz,boolean isRecurse) throws Exception{
